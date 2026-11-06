@@ -1,0 +1,8 @@
+{
+  "name": "SnapMail",
+  "description": "Fast, secure disposable email web app with live incoming messages, countdown expiry, sandboxed email viewer, and Arabic/English bilingual support. Developed & Designed by Malek Hassan Ashour.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
