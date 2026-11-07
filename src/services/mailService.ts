@@ -7,10 +7,23 @@ import {
 import { HttpError, retryOn429 } from '../lib/retryHelper.ts';
 import { demoMailService } from './demoMailService.ts';
 
+/**
+ * Mail.tm API Safe Endpoints:
+ * 1. GET /domains               -> Fetch available active domains
+ * 2. POST /accounts             -> Create temporary account { address, password }
+ * 3. POST /token                -> Acquire JWT Bearer token { address, password }
+ * 4. GET /messages?page={n}     -> Retrieve inbox messages with Bearer token
+ *
+ * For Vercel & Netlify hosting:
+ * - Local / Vite: proxied through vite.config.ts server.proxy['/api/mailtm']
+ * - Vercel: proxied through vercel.json rewrites: /api/mailtm/:path* -> https://api.mail.tm/:path*
+ * - Netlify: proxied through netlify.toml and public/_redirects
+ */
 const DIRECT_URL = 'https://api.mail.tm';
 const PROXY_URL = '/api/mailtm';
 
-let preferredBaseUrl = DIRECT_URL;
+// In browser runtime, default to /api/mailtm to prevent CORS issues on Vercel, Netlify & dev
+let preferredBaseUrl = typeof window !== 'undefined' ? PROXY_URL : DIRECT_URL;
 
 export interface IMailProvider {
   createInbox(countdownMinutes?: number): Promise<InboxSession>;

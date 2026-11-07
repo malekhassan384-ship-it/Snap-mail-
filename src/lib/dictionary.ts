@@ -50,6 +50,21 @@ export interface DictionaryStrings {
   changeDuration: string;
   extendHours: string;
   extend10m: string;
+  signIn: string;
+  signInWithGoogle: string;
+  signOut: string;
+  ownerBadge: string;
+  ownerGreeting: string;
+  ownerWelcomeBanner: string;
+  userGreeting: string;
+  siteVisitors: string;
+  inboxesGenerated: string;
+  savedInboxes: string;
+  cloudSyncNotice: string;
+  noSavedInboxes: string;
+  accountDetails: string;
+  ownerDashboard: string;
+  deploymentSafeBadge: string;
 }
 
 export const dictionaries: Record<Locale, DictionaryStrings> = {
@@ -103,6 +118,21 @@ export const dictionaries: Record<Locale, DictionaryStrings> = {
     changeDuration: "تغيير مدة الصلاحية",
     extendHours: "تمديد +1 ساعة",
     extend10m: "تمديد +10 د",
+    signIn: "تسجيل الدخول",
+    signInWithGoogle: "تسجيل الدخول باستخدام Google",
+    signOut: "تسجيل الخروج",
+    ownerBadge: "مالك الموقع",
+    ownerGreeting: "أهلاً بك يا مالك الموقع في موقعك!",
+    ownerWelcomeBanner: "أهلاً بك يا مالك الموقع! تم تسجيل دخولك بنجاح ولوحة الإحصائيات وقاعدة البيانات متصلة.",
+    userGreeting: "أهلاً بك",
+    siteVisitors: "عدد زوار الموقع",
+    inboxesGenerated: "روابط وإيميلات تم إنشاؤها",
+    savedInboxes: "سجل إيميلاتك المحفوظة",
+    cloudSyncNotice: "بياناتك محفوظة سحابياً بأمان، يمكنك تسجيل الدخول من أي جهاز آخر وستجد بياناتك.",
+    noSavedInboxes: "لم يتم إنشاء إيميلات مؤقتة في حسابك بعد.",
+    accountDetails: "بيانات الحساب السحابي",
+    ownerDashboard: "لوحة تحكم مالك الموقع",
+    deploymentSafeBadge: "إعدادات Mail.tm آمنة وجاهزة لـ Vercel و Netlify",
   },
   en: {
     appName: "SnapMail",
@@ -154,5 +184,20 @@ export const dictionaries: Record<Locale, DictionaryStrings> = {
     changeDuration: "Change Duration",
     extendHours: "Extend +1h",
     extend10m: "Extend +10m",
+    signIn: "Sign In",
+    signInWithGoogle: "Sign in with Google",
+    signOut: "Sign Out",
+    ownerBadge: "Site Owner",
+    ownerGreeting: "Welcome, Site Owner, to your platform!",
+    ownerWelcomeBanner: "Welcome, Site Owner! Your account is verified, and real-time cloud statistics are live.",
+    userGreeting: "Welcome",
+    siteVisitors: "Total Site Visitors",
+    inboxesGenerated: "Inboxes / Links Generated",
+    savedInboxes: "Saved Cloud Inboxes",
+    cloudSyncNotice: "Your data is securely persisted in the cloud. Log in from any device to access your history.",
+    noSavedInboxes: "No inboxes created under this account yet.",
+    accountDetails: "Cloud Account Details",
+    ownerDashboard: "Owner Control Center",
+    deploymentSafeBadge: "Mail.tm Safe API Config (Vercel & Netlify Ready)",
   }
 };

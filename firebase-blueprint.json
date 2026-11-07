@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and activity stats",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 128 },
+        "photoURL": { "type": "string", "maxLength": 512 },
+        "role": { "type": "string", "enum": ["owner", "user"] },
+        "inboxesCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "UserInbox": {
+      "title": "UserInbox",
+      "description": "Saved temporary disposable email inbox for an authenticated user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "address": { "type": "string", "maxLength": 256 },
+        "duration": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string" },
+        "expiresAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "expired"] }
+      },
+      "required": ["id", "userId", "address", "createdAt"]
+    },
+    "SiteStats": {
+      "title": "SiteStats",
+      "description": "Aggregated site visitor and inbox counters",
+      "type": "object",
+      "properties": {
+        "visitorsCount": { "type": "number" },
+        "inboxesGeneratedCount": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["visitorsCount", "inboxesGeneratedCount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Stores individual user profile and statistics"
+    },
+    "/users/{userId}/inboxes/{inboxId}": {
+      "schema": { "$ref": "#/entities/UserInbox" },
+      "description": "Stores user disposable email inboxes history"
+    },
+    "/stats/site": {
+      "schema": { "$ref": "#/entities/SiteStats" },
+      "description": "Global statistics for site visitors and link generation"
+    }
+  }
+}

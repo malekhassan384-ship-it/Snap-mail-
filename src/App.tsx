@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Crown, Sparkles } from 'lucide-react';
 import { Header } from './components/Header.tsx';
 import { AddressBar } from './components/AddressBar.tsx';
 import { MessageList } from './components/MessageList.tsx';
@@ -7,11 +8,13 @@ import { ExpiredPanel } from './components/ExpiredPanel.tsx';
 import { ErrorBanner } from './components/ErrorBanner.tsx';
 import { QrDialog } from './components/QrDialog.tsx';
 import { HelpModal } from './components/HelpModal.tsx';
+import { AccountModal } from './components/AccountModal.tsx';
 import { AdSlot } from './components/AdSlot.tsx';
 import { Footer } from './components/Footer.tsx';
 import { useInbox } from './hooks/useInbox.ts';
 import { useCountdown } from './hooks/useCountdown.ts';
 import { useLanguage } from './hooks/useLanguage.tsx';
+import { useAuth } from './hooks/useAuth.tsx';
 import { MailMessageDetail } from './types/index.ts';
 
 export default function App() {
@@ -34,12 +37,16 @@ export default function App() {
   } = useInbox();
 
   const { t } = useLanguage();
+  const { user, isOwner, recordNewInbox } = useAuth();
 
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [selectedMessageDetail, setSelectedMessageDetail] = useState<MailMessageDetail | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  const recordedAddressesRef = useRef<Set<string>>(new Set());
 
   // Hook for countdown timer
   const {
@@ -55,6 +62,16 @@ export default function App() {
       create(10);
     }
   }, [status, create]);
+
+  // Record newly created session to Cloud/Firestore for logged-in user and global stats
+  useEffect(() => {
+    if (session?.address && !recordedAddressesRef.current.has(session.address)) {
+      recordedAddressesRef.current.add(session.address);
+      recordNewInbox(session.address, `${selectedDuration}m`).catch((err) => {
+        console.warn('Background sync for new inbox:', err);
+      });
+    }
+  }, [session?.address, selectedDuration, recordNewInbox]);
 
   // Handle browser back button navigation on mobile
   useEffect(() => {
@@ -125,11 +142,42 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#0F1B3D]">
-      {/* Header */}
-      <Header onOpenHelp={() => setIsHelpOpen(true)} />
+      {/* Header with Auth & Owner controls */}
+      <Header
+        onOpenHelp={() => setIsHelpOpen(true)}
+        onOpenAccount={() => setIsAccountOpen(true)}
+      />
 
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-[1200px] mx-auto px-4 md:px-6 py-6 md:py-8">
+        {/* Special Owner Welcome & Verification Banner */}
+        {isOwner && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-blue-500/10 to-indigo-500/15 border-2 border-amber-300 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm md:text-base font-bold text-amber-950">
+                    {t.ownerGreeting}
+                  </h2>
+                  <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
+                </div>
+                <p className="text-xs text-amber-900/80 truncate">
+                  {t.ownerWelcomeBanner}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsAccountOpen(true)}
+              className="px-4 py-2 text-xs font-bold text-amber-950 bg-amber-200 hover:bg-amber-300 rounded-xl transition-colors cursor-pointer shrink-0 border border-amber-300 shadow-xs self-start sm:self-auto"
+            >
+              {t.ownerDashboard}
+            </button>
+          </div>
+        )}
+
         {/* Error Banner if errorText is active */}
         {errorText && (
           <ErrorBanner
@@ -138,7 +186,7 @@ export default function App() {
           />
         )}
 
-        {/* Ad slot (Phase 1: renders nothing unless VITE_ADS_ENABLED is 'true') */}
+        {/* Ad slot */}
         <AdSlot />
 
         {isExpired ? (
@@ -193,6 +241,12 @@ export default function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Account & Owner Modal */}
+      <AccountModal
+        isOpen={isAccountOpen}
+        onClose={() => setIsAccountOpen(false)}
+      />
 
       {/* QR Dialog Modal */}
       <QrDialog

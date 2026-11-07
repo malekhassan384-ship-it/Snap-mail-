@@ -57,3 +57,31 @@ export type InboxStatus = 'idle' | 'creating' | 'ready' | 'expired' | 'error';
 export type CountdownLevel = 'ok' | 'warn' | 'critical' | 'expired';
 
 export type Locale = 'ar' | 'en';
+
+export interface UserProfileDoc {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  role: 'owner' | 'user';
+  inboxesCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SavedInboxDoc {
+  id: string;
+  userId: string;
+  address: string;
+  duration?: string;
+  createdAt: string;
+  expiresAt?: string;
+  status: 'active' | 'expired';
+}
+
+export interface SiteStatsDoc {
+  visitorsCount: number;
+  inboxesGeneratedCount: number;
+  updatedAt?: string;
+}
+
