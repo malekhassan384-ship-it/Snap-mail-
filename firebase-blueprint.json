@@ -11,6 +11,7 @@
         "photoURL": { "type": "string", "maxLength": 512 },
         "role": { "type": "string", "enum": ["owner", "user"] },
         "inboxesCount": { "type": "number" },
+        "registeredCounted": { "type": "boolean" },
         "createdAt": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
@@ -37,6 +38,7 @@
       "type": "object",
       "properties": {
         "visitorsCount": { "type": "number" },
+        "signedInUsersCount": { "type": "number" },
         "inboxesGeneratedCount": { "type": "number" },
         "updatedAt": { "type": "string" }
       },

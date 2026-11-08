@@ -85,7 +85,9 @@ export const MessageView: React.FC<MessageViewProps> = ({
     return (
       <div className="snap-card h-[520px] p-6 flex flex-col justify-center items-center">
         <div className="w-8 h-8 border-3 border-[#2563EB] border-t-transparent rounded-full animate-spin mb-3" />
-        <span className="text-xs text-[#5B6B8C]">Loading message...</span>
+        <span className="text-xs text-[#5B6B8C]">
+          {locale === 'ar' ? 'جارٍ تحميل محتوى الرسالة...' : 'Loading message...'}
+        </span>
       </div>
     );
   }

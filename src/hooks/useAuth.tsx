@@ -41,6 +41,7 @@ interface AuthContextValue {
 
 const defaultStats: SiteStatsDoc = {
   visitorsCount: 1,
+  signedInUsersCount: 1,
   inboxesGeneratedCount: 0,
 };
 
@@ -67,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const data = snapshot.data() as Partial<SiteStatsDoc>;
           setSiteStats({
             visitorsCount: typeof data.visitorsCount === 'number' ? data.visitorsCount : 1,
+            signedInUsersCount: typeof data.signedInUsersCount === 'number' ? data.signedInUsersCount : 1,
             inboxesGeneratedCount: typeof data.inboxesGeneratedCount === 'number' ? data.inboxesGeneratedCount : 0,
             updatedAt: data.updatedAt,
           });
@@ -85,13 +87,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!hasLogged) {
           const snap = await getDoc(statsDocRef);
           if (snap.exists()) {
-            await updateDoc(statsDocRef, {
+            const data = snap.data();
+            const updates: Record<string, unknown> = {
               visitorsCount: increment(1),
               updatedAt: new Date().toISOString(),
-            });
+            };
+            if (typeof data['signedInUsersCount'] !== 'number') {
+              updates['signedInUsersCount'] = 1;
+            }
+            await updateDoc(statsDocRef, updates);
           } else {
             await setDoc(statsDocRef, {
               visitorsCount: 1,
+              signedInUsersCount: 1,
               inboxesGeneratedCount: 0,
               updatedAt: new Date().toISOString(),
             });
@@ -112,6 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 2. Auth State Listener & User Data Sync
   useEffect(() => {
+    const statsDocRef = doc(db, 'stats', 'site');
     const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
@@ -136,20 +145,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             photoURL: currentUser.photoURL || undefined,
             role,
             inboxesCount: 0,
+            registeredCounted: true,
             createdAt: nowIso,
             updatedAt: nowIso,
           };
           await setDoc(userRef, initialProfile);
           setUserProfile(initialProfile);
-        } else {
-          const existingData = userSnap.data() as UserProfileDoc;
-          // Ensure owner role is synchronized if owner logs in
-          if (role === 'owner' && existingData.role !== 'owner') {
-            await updateDoc(userRef, {
-              role: 'owner',
+
+          // Increment registered users in stats
+          try {
+            await updateDoc(statsDocRef, {
+              signedInUsersCount: increment(1),
               updatedAt: nowIso,
             });
-            setUserProfile({ ...existingData, role: 'owner', updatedAt: nowIso });
+          } catch (e) {
+            console.warn('Could not increment signedInUsersCount:', e);
+          }
+        } else {
+          const existingData = userSnap.data() as UserProfileDoc;
+          const updates: Record<string, unknown> = {};
+
+          if (role === 'owner' && existingData.role !== 'owner') {
+            updates.role = 'owner';
+            updates.updatedAt = nowIso;
+          }
+
+          // Count existing user once if not counted yet
+          if (!existingData.registeredCounted) {
+            updates.registeredCounted = true;
+            updates.updatedAt = nowIso;
+            try {
+              await updateDoc(statsDocRef, {
+                signedInUsersCount: increment(1),
+                updatedAt: nowIso,
+              });
+            } catch (e) {
+              console.warn('Could not increment signedInUsersCount for existing user:', e);
+            }
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(userRef, updates);
+            setUserProfile({ ...existingData, ...updates } as UserProfileDoc);
           } else {
             setUserProfile(existingData);
           }
@@ -292,6 +329,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const data = snap.data() as Partial<SiteStatsDoc>;
         setSiteStats({
           visitorsCount: typeof data.visitorsCount === 'number' ? data.visitorsCount : 1,
+          signedInUsersCount: typeof data.signedInUsersCount === 'number' ? data.signedInUsersCount : 1,
           inboxesGeneratedCount: typeof data.inboxesGeneratedCount === 'number' ? data.inboxesGeneratedCount : 0,
           updatedAt: data.updatedAt,
         });

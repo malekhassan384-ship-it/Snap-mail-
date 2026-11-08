@@ -65,6 +65,7 @@ export interface UserProfileDoc {
   photoURL?: string;
   role: 'owner' | 'user';
   inboxesCount: number;
+  registeredCounted?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -81,6 +82,7 @@ export interface SavedInboxDoc {
 
 export interface SiteStatsDoc {
   visitorsCount: number;
+  signedInUsersCount?: number;
   inboxesGeneratedCount: number;
   updatedAt?: string;
 }

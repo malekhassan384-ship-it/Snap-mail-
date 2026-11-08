@@ -58,6 +58,8 @@ export interface DictionaryStrings {
   ownerWelcomeBanner: string;
   userGreeting: string;
   siteVisitors: string;
+  signedInUsers: string;
+  signedInUsersDesc: string;
   inboxesGenerated: string;
   savedInboxes: string;
   cloudSyncNotice: string;
@@ -126,6 +128,8 @@ export const dictionaries: Record<Locale, DictionaryStrings> = {
     ownerWelcomeBanner: "أهلاً بك يا مالك الموقع! تم تسجيل دخولك بنجاح ولوحة الإحصائيات وقاعدة البيانات متصلة.",
     userGreeting: "أهلاً بك",
     siteVisitors: "عدد زوار الموقع",
+    signedInUsers: "الذين سجلوا دخول",
+    signedInUsersDesc: "مستخدم مسجل في الموقع",
     inboxesGenerated: "روابط وإيميلات تم إنشاؤها",
     savedInboxes: "سجل إيميلاتك المحفوظة",
     cloudSyncNotice: "بياناتك محفوظة سحابياً بأمان، يمكنك تسجيل الدخول من أي جهاز آخر وستجد بياناتك.",
@@ -192,6 +196,8 @@ export const dictionaries: Record<Locale, DictionaryStrings> = {
     ownerWelcomeBanner: "Welcome, Site Owner! Your account is verified, and real-time cloud statistics are live.",
     userGreeting: "Welcome",
     siteVisitors: "Total Site Visitors",
+    signedInUsers: "Signed In Users",
+    signedInUsersDesc: "Registered user accounts",
     inboxesGenerated: "Inboxes / Links Generated",
     savedInboxes: "Saved Cloud Inboxes",
     cloudSyncNotice: "Your data is securely persisted in the cloud. Log in from any device to access your history.",

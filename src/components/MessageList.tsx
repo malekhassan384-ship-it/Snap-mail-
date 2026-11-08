@@ -1,5 +1,4 @@
-import React from 'react';
-import { Mail, RefreshCw, Inbox as InboxIcon } from 'lucide-react';
+import { Mail, RefreshCw } from 'lucide-react';
 import { MailMessageSummary } from '../types/index.ts';
 import { useLanguage } from '../hooks/useLanguage.tsx';
 import { formatRelativeTime } from '../lib/timeHelper.ts';

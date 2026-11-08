@@ -33,12 +33,13 @@ service cloud.firestore {
 
     function isValidUserProfile(data) {
       return data.keys().hasAll(['uid', 'email'])
-        && data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'role', 'inboxesCount', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'role', 'inboxesCount', 'registeredCounted', 'createdAt', 'updatedAt'])
         && data.uid is string && data.uid.size() > 0 && data.uid.size() <= 128
         && data.email is string && data.email.size() > 3 && data.email.size() <= 256
         && (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 128))
         && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 512))
         && (!('role' in data) || (data.role in ['owner', 'user']))
+        && (!('registeredCounted' in data) || (data.registeredCounted is bool))
         && (!('inboxesCount' in data) || (data.inboxesCount is number && data.inboxesCount >= 0));
     }
 
@@ -54,9 +55,10 @@ service cloud.firestore {
 
     function isValidSiteStats(data) {
       return data.keys().hasAll(['visitorsCount', 'inboxesGeneratedCount'])
-        && data.keys().hasOnly(['visitorsCount', 'inboxesGeneratedCount', 'updatedAt'])
+        && data.keys().hasOnly(['visitorsCount', 'inboxesGeneratedCount', 'signedInUsersCount', 'updatedAt'])
         && data.visitorsCount is number && data.visitorsCount >= 0
-        && data.inboxesGeneratedCount is number && data.inboxesGeneratedCount >= 0;
+        && data.inboxesGeneratedCount is number && data.inboxesGeneratedCount >= 0
+        && (!('signedInUsersCount' in data) || (data.signedInUsersCount is number && data.signedInUsersCount >= 0));
     }
 
     // Users Collection
@@ -67,13 +69,14 @@ service cloud.firestore {
         && (incoming().role != 'owner' || isOwner());
       allow update: if isValidId(userId) && (isSelf(userId) || isOwner())
         && isValidUserProfile(incoming())
-        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'inboxesCount', 'updatedAt', 'role'])
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'inboxesCount', 'registeredCounted', 'updatedAt', 'role'])
         && (incoming().role == existing().role || isOwner());
       allow delete: if isValidId(userId) && (isSelf(userId) || isOwner());
 
       // Inboxes Subcollection
       match /inboxes/{inboxId} {
-        allow get, list: if isValidId(userId) && isValidId(inboxId) && (isSelf(userId) || isOwner());
+        allow get: if isValidId(userId) && isValidId(inboxId) && (isSelf(userId) || isOwner());
+        allow list: if isValidId(userId) && (isSelf(userId) || isOwner());
         allow create: if isValidId(userId) && isValidId(inboxId) && isSelf(userId)
           && isValidUserInbox(incoming(), userId);
         allow update: if isValidId(userId) && isValidId(inboxId) && (isSelf(userId) || isOwner())

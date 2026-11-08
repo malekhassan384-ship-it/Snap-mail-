@@ -6,13 +6,13 @@ import {
   Mail,
   Check,
   Copy,
-  ExternalLink,
   ShieldCheck,
   LogOut,
   RefreshCw,
   Globe2,
   Clock,
   Sparkles,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useLanguage } from '../hooks/useLanguage.tsx';
@@ -64,6 +64,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     try {
       await signInWithGoogle();
     } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('auth/popup-closed-by-user')) {
+        // User voluntarily closed the sign-in modal; no error required
+        return;
+      }
       setAuthError(err instanceof Error ? err.message : 'Login failed');
     }
   };
@@ -176,7 +180,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="p-4 rounded-2xl bg-[#F0F7FF] border border-[#BFDBFE] flex items-center justify-between">
+                <div className="p-4 rounded-2xl bg-[#F0F7FF] border border-[#BFDBFE] flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-bold text-[#0F1B3D]">
                       {t.userGreeting}، {user.displayName || user.email}
@@ -185,17 +189,22 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       {t.cloudSyncNotice}
                     </p>
                   </div>
+                  {userProfile && (
+                    <span className="px-2.5 py-1 text-xs font-mono font-semibold bg-blue-100 text-[#2563EB] rounded-xl shrink-0">
+                      {userProfile.inboxesCount ?? savedInboxes.length} {locale === 'ar' ? 'صندوق' : 'inboxes'}
+                    </span>
+                  )}
                 </div>
               )}
 
               {/* Statistics Cards */}
-              <div className="grid grid-cols-2 gap-3.5">
-                {/* Site Visitors Card (Prominent for Owner) */}
-                <div className={`p-4 rounded-2xl border ${
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Site Visitors Card */}
+                <div className={`p-3.5 rounded-2xl border ${
                   isOwner ? 'bg-amber-50/60 border-amber-200' : 'bg-white border-[#BFDBFE]'
                 }`}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium text-[#5B6B8C] flex items-center gap-1.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-medium text-[#5B6B8C] flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5 text-[#2563EB]" />
                       {t.siteVisitors}
                     </span>
@@ -211,29 +220,47 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       </button>
                     )}
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-[#0F1B3D] tracking-tight font-mono">
+                  <div className="text-xl md:text-2xl font-extrabold text-[#0F1B3D] tracking-tight font-mono">
                     {siteStats.visitorsCount.toLocaleString()}
                   </div>
-                  <p className="text-[11px] text-[#5B6B8C] mt-1">
-                    {locale === 'ar' ? 'زائر حقيقي للموقع' : 'Unique site visitors'}
+                  <p className="text-[10px] text-[#5B6B8C] mt-0.5">
+                    {locale === 'ar' ? 'زائر حقيقي' : 'Unique visitors'}
+                  </p>
+                </div>
+
+                {/* Signed In Users Card */}
+                <div className={`p-3.5 rounded-2xl border ${
+                  isOwner ? 'bg-indigo-50/60 border-indigo-200' : 'bg-white border-[#BFDBFE]'
+                }`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-medium text-[#5B6B8C] flex items-center gap-1.5">
+                      <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
+                      {t.signedInUsers}
+                    </span>
+                  </div>
+                  <div className="text-xl md:text-2xl font-extrabold text-indigo-600 tracking-tight font-mono">
+                    {(siteStats.signedInUsersCount ?? 1).toLocaleString()}
+                  </div>
+                  <p className="text-[10px] text-[#5B6B8C] mt-0.5">
+                    {t.signedInUsersDesc}
                   </p>
                 </div>
 
                 {/* Inboxes Generated Card */}
-                <div className={`p-4 rounded-2xl border ${
+                <div className={`p-3.5 rounded-2xl border ${
                   isOwner ? 'bg-blue-50/60 border-blue-200' : 'bg-white border-[#BFDBFE]'
                 }`}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium text-[#5B6B8C] flex items-center gap-1.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[11px] font-medium text-[#5B6B8C] flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
                       {t.inboxesGenerated}
                     </span>
                   </div>
-                  <div className="text-2xl md:text-3xl font-extrabold text-[#2563EB] tracking-tight font-mono">
+                  <div className="text-xl md:text-2xl font-extrabold text-[#2563EB] tracking-tight font-mono">
                     {siteStats.inboxesGeneratedCount.toLocaleString()}
                   </div>
-                  <p className="text-[11px] text-[#5B6B8C] mt-1">
-                    {locale === 'ar' ? 'إجمالي الصناديق المنشأة' : 'Total created inboxes'}
+                  <p className="text-[10px] text-[#5B6B8C] mt-0.5">
+                    {locale === 'ar' ? 'صندوق مؤقت' : 'Inboxes created'}
                   </p>
                 </div>
               </div>
